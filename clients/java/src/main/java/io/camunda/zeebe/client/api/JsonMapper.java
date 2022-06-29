@@ -118,4 +118,16 @@ public interface JsonMapper {
    *     serialization/deserialization error
    */
   String validateJson(final String propertyName, final InputStream jsonInput);
+
+  /**
+   * Convert (deserializing and serializing) an object into an equivalent POJO of type {@code T}.
+   *
+   * @param variable the object to deserialize
+   * @param typeClass the Java type to deserialize into
+   * @param <T> the type of the returned object
+   * @return the POJO deserialized from the given JSON string
+   * @throws io.camunda.zeebe.client.api.command.InternalClientException on
+   *     serialization/deserialization error
+   */
+  <T> T fromObject(Object variable, Class<T> typeClass);
 }

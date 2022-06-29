@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.camunda.zeebe.client.api.JsonMapper;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.gateway.protocol.GatewayOuterClass;
+
 import java.util.Map;
 
 public final class ActivatedJobImpl implements ActivatedJob {
@@ -130,6 +131,15 @@ public final class ActivatedJobImpl implements ActivatedJob {
   @Override
   public <T> T getVariablesAsType(final Class<T> variableType) {
     return jsonMapper.fromJson(variables, variableType);
+  }
+
+  @Override
+  public <T> T getVariableAsTypeByKey(String key, Class<T> variableType) {
+    Map<String, Object> variablesAsMap = getVariablesAsMap();
+    if (variablesAsMap == null) return null;
+    Object variable = variablesAsMap.get(key);
+    if (variable == null) return null;
+    return jsonMapper.fromObject(variable, variableType);
   }
 
   @Override

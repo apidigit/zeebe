@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.zeebe.client.api.JsonMapper;
 import io.camunda.zeebe.client.api.command.InternalClientException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -103,6 +104,21 @@ public final class ZeebeObjectMapper implements JsonMapper {
     } catch (final IOException e) {
       throw new InternalClientException(
           String.format("Failed to validate json input stream for property '%s'", propertyName), e);
+    }
+  }
+
+  @Override
+  public <T> T fromObject(Object variable, Class<T> variableType) {
+    String variableAsString;
+    try {
+      variableAsString = objectMapper.writeValueAsString(variable);
+    } catch (JsonProcessingException e) {
+      throw new InternalClientException("Failed to write variable as string");
+    }
+    try {
+      return objectMapper.readValue(variableAsString, variableType);
+    } catch (JsonProcessingException e) {
+      throw new InternalClientException("Failed to convert variable to the provided type");
     }
   }
 }

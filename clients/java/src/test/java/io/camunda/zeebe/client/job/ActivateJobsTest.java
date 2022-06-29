@@ -15,10 +15,6 @@
  */
 package io.camunda.zeebe.client.job;
 
-import static io.camunda.zeebe.client.util.JsonUtil.fromJsonAsMap;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.camunda.zeebe.client.api.command.ClientException;
 import io.camunda.zeebe.client.api.response.ActivateJobsResponse;
 import io.camunda.zeebe.client.impl.ZeebeObjectMapper;
@@ -26,10 +22,15 @@ import io.camunda.zeebe.client.impl.response.ActivatedJobImpl;
 import io.camunda.zeebe.client.util.ClientTest;
 import io.camunda.zeebe.gateway.protocol.GatewayOuterClass.ActivateJobsRequest;
 import io.camunda.zeebe.gateway.protocol.GatewayOuterClass.ActivatedJob;
+import org.junit.Test;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
+
+import static io.camunda.zeebe.client.util.JsonUtil.fromJsonAsMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public final class ActivateJobsTest extends ClientTest {
 
@@ -246,6 +247,27 @@ public final class ActivateJobsTest extends ClientTest {
     assertThat(variablesPojo.getA()).isEqualTo(1);
   }
 
+  @Test
+  public void shouldDeserializeEntirelyToPojo() {
+    // given
+    final ActivatedJobImpl activatedJob =
+        new ActivatedJobImpl(
+            new ZeebeObjectMapper(),
+            ActivatedJob.newBuilder()
+                .setCustomHeaders("{}")
+                .setVariables("{\"b\":{\"c\":1,\"d\":\"Z\"}}")
+                .build());
+
+    // when
+    final KeyVariablesPojo variablesPojo =
+        activatedJob.getVariableAsTypeByKey("b", KeyVariablesPojo.class);
+
+    // then
+    assertThat(variablesPojo).isNotNull();
+    assertThat(variablesPojo.getC()).isEqualTo(1);
+    assertThat(variablesPojo.getD()).isEqualTo("Z");
+  }
+
   static class VariablesPojo {
 
     int a;
@@ -257,6 +279,20 @@ public final class ActivateJobsTest extends ClientTest {
     public VariablesPojo setA(final int a) {
       this.a = a;
       return this;
+    }
+  }
+
+  static class KeyVariablesPojo {
+
+    int c;
+    String d;
+
+    public int getC() {
+      return c;
+    }
+
+    public String getD() {
+      return d;
     }
   }
 }

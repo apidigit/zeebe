@@ -97,6 +97,11 @@ public interface ActivatedJob {
   <T> T getVariablesAsType(Class<T> variableType);
 
   /**
+   * @return de-serialized variables as the given type
+   */
+  <T> T getVariableAsTypeByKey(String key, Class<T> variableType);
+
+  /**
    * @return the record encoded as JSON
    */
   String toJson();
